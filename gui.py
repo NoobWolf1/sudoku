@@ -35,6 +35,7 @@ CellSize = SquareSize // 3
 White = (255,255,255)
 Black = (0,0,0)
 LightGrey = (200,200,200)
+Blue = (0,0,255)
 
 def populateCells():
 	i,j = 0,0
@@ -84,9 +85,33 @@ def drawGrid():
 
 	populateCells()
 
+def selectBox(mousex,mousey):
+	xTopLeft = mousex -  (mousex % CellSize)
+	yTopLeft = mousey -  (mousey % CellSize)
+	xnumber =  xTopLeft // CellSize
+	ynumber =  yTopLeft // CellSize
+	if board[ynumber][xnumber] == 0:
+		print(xnumber,ynumber)
+		pygame.draw.rect(DisplaySurf, Blue, (xTopLeft,yTopLeft,CellSize,CellSize), 3 )
+
+
+	#fix the error for sticky selected boxes
+	#write a code to scribe into the board
+	#include functions from backtrackingAlgo.py
+
+
+
+
+
+
+
+
 
 def main():
 	global FPSClock, DisplaySurf, BasicFont, BasicFontSize
+	mouseClicked = False
+	mousex = 0
+	mousey = 0
 	pygame.init()
 	FPSClock = pygame.time.Clock()
 
@@ -96,12 +121,11 @@ def main():
 	BasicFontSize = 30
 	BasicFont = pygame.font.SysFont('Arial', BasicFontSize)
 
-
 	DisplaySurf.fill(White)
-
 	drawGrid()
+	
 
-
+	#add the ability to click the blank and scribe a number to it
 
 	run = True
 	while run:
@@ -110,6 +134,19 @@ def main():
 				run = False 
 				pygame.quit()
 				sys.exit()
+			#the movement of mouse
+			elif event.type == MOUSEMOTION:
+				mousex,mousey = event.pos 
+			elif event.type == MOUSEBUTTONUP:
+				mousex,mousey = event.pos
+				mouseClicked = True
+
+		if mouseClicked == True:
+			print(mousex, mousey)
+			selectBox(mousex, mousey)
+
+	
+		mouseClicked = False
 
 		pygame.display.update()
 		FPSClock.tick(FPS)
