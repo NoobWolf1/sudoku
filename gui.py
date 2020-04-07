@@ -41,11 +41,19 @@ def populateCells():
 	for y in range(0,WindowHeight,CellSize):
 		i = 0
 		for x in range(0, WindowWidth, CellSize):
-			
-			cellSurf = BasicFont.render('%s' %(board[i][j]) , True , Black )
-			cellRect = cellSurf.get_rect()
-			cellRect.topleft = (x+CellSize/3,y+CellSize/3)
-			DisplaySurf.blit(cellSurf, cellRect)
+
+			if board[j][i] != 0:
+				cellSurf = BasicFont.render('%s' %(board[j][i]) , True , Black )
+				cellRect = cellSurf.get_rect()
+				cellRect.topleft = (x+CellSize/3,y+CellSize/3)
+				DisplaySurf.blit(cellSurf, cellRect)
+
+			else:
+				cellSurf = BasicFont.render('%s' %('_') , True , Black )
+				cellRect = cellSurf.get_rect()
+				cellRect.topleft = (x+CellSize/3,y+CellSize/3)
+				DisplaySurf.blit(cellSurf, cellRect)
+
 			i += 1
 		j += 1
 
