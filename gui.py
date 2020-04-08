@@ -1,5 +1,6 @@
 import pygame, sys
 from pygame.locals import *
+from backtrackingAlgo import solve, valid
 
 board = [
 	[7,8,0,4,0,0,1,2,0],
@@ -13,7 +14,6 @@ board = [
 	[0,4,9,2,0,6,0,0,7]
 
 ]
-
 
 #frame dimensions
 WindowWidth = 270
@@ -104,6 +104,14 @@ def deselectBox(mousex,mousey):
 	DisplaySurf.fill(White)
 	drawGrid()
 
+def scribe_into(mousex,mousey,key):
+	xnumber = (mousex - (mousex % CellSize)) // CellSize
+	ynumber = (mousey - (mousey % CellSize)) // CellSize
+
+	if valid(board, key,(ynumber,xnumber)):
+		print("Naacho")
+
+
 
 #write a code to scribe into the board
 #include functions from backtrackingAlgo.py
@@ -111,7 +119,6 @@ def deselectBox(mousex,mousey):
 
 def main():
 	global FPSClock, DisplaySurf, BasicFont, BasicFontSize, mouseClicked
-
 	clickCount = 0
 	
 
@@ -132,7 +139,7 @@ def main():
 	
 
 	#add the ability to click the blank and scribe a number to it
-
+	key =0
 	run = True
 	while run:
 		for event in pygame.event.get():
@@ -141,19 +148,51 @@ def main():
 				pygame.quit()
 				sys.exit()
 			#the movement of mouse
-			elif event.type == MOUSEMOTION:
+			if event.type == MOUSEMOTION:
 				mousex,mousey = event.pos 
-			elif event.type == MOUSEBUTTONUP:
+			if event.type == MOUSEBUTTONUP:
 				mousex,mousey = event.pos
 				mouseClicked = True
 
+			if event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_1:
+					key = 1
+				if event.key == pygame.K_2:
+					key = 2
+				if event.key == pygame.K_3:
+					key = 3
+				if event.key == pygame.K_4:
+					key = 4
+				if event.key == pygame.K_5:
+					key = 5
+				if event.key == pygame.K_6:
+					key = 6
+				if event.key == pygame.K_7:
+					key = 7
+				if event.key == pygame.K_8:
+					key = 8
+				if event.key == pygame.K_9:
+					key = 9
+				if event.key == pygame.K_DELETE or event.key ==  pygame.K_BACKSPACE:
+						#board.clear()
+					key = None
+
+			print(key)
+		
+
+		#print(mousex, mousey,key)
+
+		
 		if mouseClicked == True:
 			clickCount += 1
-			if validSelection(mousex,mousey) and clickCount%2 == 1 :
-				print(mousex, mousey)			
+			if validSelection(mousex,mousey) and clickCount%2 == 1:
+				#print(mousex, mousey)			
 				selectBox(mousex, mousey)
+				if key != 0 or key is not None:
+					scribe_into(mousex,mousey,key)
 			else:
 				deselectBox(mousex,mousey)
+
 
 		mouseClicked = False
 
