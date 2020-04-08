@@ -59,9 +59,6 @@ def populateCells():
 		j += 1
 
 
-
-
-
 def drawGrid():
 	# Draw minor lines
 
@@ -88,27 +85,36 @@ def drawGrid():
 def selectBox(mousex,mousey):
 	xTopLeft = mousex -  (mousex % CellSize)
 	yTopLeft = mousey -  (mousey % CellSize)
+
 	xnumber =  xTopLeft // CellSize
 	ynumber =  yTopLeft // CellSize
-	if board[ynumber][xnumber] == 0:
-		print(xnumber,ynumber)
+
+
+	if board[ynumber][xnumber] == 0 and mouseClicked is True   :
 		pygame.draw.rect(DisplaySurf, Blue, (xTopLeft,yTopLeft,CellSize,CellSize), 3 )
 
 
-	#fix the error for sticky selected boxes
-	#write a code to scribe into the board
-	#include functions from backtrackingAlgo.py
+def validSelection(mousex,mousey):
+	xnumber = (mousex - (mousex % CellSize)) // CellSize
+	ynumber = (mousey - (mousey % CellSize)) // CellSize
+	if board[ynumber][xnumber] == 0 :
+		return True
+
+def deselectBox(mousex,mousey):
+	DisplaySurf.fill(White)
+	drawGrid()
 
 
-
-
-
-
-
+#write a code to scribe into the board
+#include functions from backtrackingAlgo.py
 
 
 def main():
-	global FPSClock, DisplaySurf, BasicFont, BasicFontSize
+	global FPSClock, DisplaySurf, BasicFont, BasicFontSize, mouseClicked
+
+	clickCount = 0
+	
+
 	mouseClicked = False
 	mousex = 0
 	mousey = 0
@@ -142,14 +148,19 @@ def main():
 				mouseClicked = True
 
 		if mouseClicked == True:
-			print(mousex, mousey)
-			selectBox(mousex, mousey)
+			clickCount += 1
+			if validSelection(mousex,mousey) and clickCount%2 == 1 :
+				print(mousex, mousey)			
+				selectBox(mousex, mousey)
+			else:
+				deselectBox(mousex,mousey)
 
-	
 		mouseClicked = False
 
 		pygame.display.update()
 		FPSClock.tick(FPS)
+
+
 
 
 
