@@ -82,6 +82,12 @@ def drawGrid():
 
 	populateCells()
 
+def validSelection(mousex,mousey):
+	xnumber = (mousex - (mousex % CellSize)) // CellSize
+	ynumber = (mousey - (mousey % CellSize)) // CellSize
+	if board[ynumber][xnumber] == 0 :
+		return True
+
 def selectBox(mousex,mousey):
 	xTopLeft = mousex -  (mousex % CellSize)
 	yTopLeft = mousey -  (mousey % CellSize)
@@ -92,24 +98,29 @@ def selectBox(mousex,mousey):
 
 	if board[ynumber][xnumber] == 0 and mouseClicked is True   :
 		pygame.draw.rect(DisplaySurf, Blue, (xTopLeft,yTopLeft,CellSize,CellSize), 3 )
+		#checkIfKeyPressed()
 
 
-def validSelection(mousex,mousey):
-	xnumber = (mousex - (mousex % CellSize)) // CellSize
-	ynumber = (mousey - (mousey % CellSize)) // CellSize
-	if board[ynumber][xnumber] == 0 :
-		return True
+
 
 def deselectBox(mousex,mousey):
 	DisplaySurf.fill(White)
 	drawGrid()
 
 def scribe_into(mousex,mousey,key):
-	xnumber = (mousex - (mousex % CellSize)) // CellSize
-	ynumber = (mousey - (mousey % CellSize)) // CellSize
+	x = mousex - (mousex % CellSize)
+	y = mousey - (mousey % CellSize)
+	xnumber = x // CellSize
+	ynumber = y // CellSize
+
 
 	if valid(board, key,(ynumber,xnumber)):
-		print("Naacho")
+		cellSurf = BasicFont.render('%s' %(key) , True , LightGrey )
+		cellRect = cellSurf.get_rect()
+		cellRect.topleft = (x+CellSize/3,y+CellSize/3)
+		DisplaySurf.blit(cellSurf, cellRect)
+
+		
 
 
 
@@ -118,9 +129,12 @@ def scribe_into(mousex,mousey,key):
 
 
 def main():
-	global FPSClock, DisplaySurf, BasicFont, BasicFontSize, mouseClicked
+	global FPSClock, DisplaySurf, BasicFont, BasicFontSize, mouseClicked,clickCount
 	clickCount = 0
-	
+
+	#selectCellValue = False
+	selectCellValue = False
+	key = None
 
 	mouseClicked = False
 	mousex = 0
@@ -137,11 +151,11 @@ def main():
 	DisplaySurf.fill(White)
 	drawGrid()
 	
-
-	#add the ability to click the blank and scribe a number to it
-	key =0
 	run = True
 	while run:
+
+		#checkMouseMotion()
+
 		for event in pygame.event.get():
 			if event.type == QUIT :
 				run = False 
@@ -154,52 +168,62 @@ def main():
 				mousex,mousey = event.pos
 				mouseClicked = True
 
-			if event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_1:
-					key = 1
-				if event.key == pygame.K_2:
-					key = 2
-				if event.key == pygame.K_3:
-					key = 3
-				if event.key == pygame.K_4:
-					key = 4
-				if event.key == pygame.K_5:
-					key = 5
-				if event.key == pygame.K_6:
-					key = 6
-				if event.key == pygame.K_7:
-					key = 7
-				if event.key == pygame.K_8:
-					key = 8
-				if event.key == pygame.K_9:
-					key = 9
-				if event.key == pygame.K_DELETE or event.key ==  pygame.K_BACKSPACE:
-						#board.clear()
-					key = None
 
-			print(key)
+			if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_1:
+						key = 1
+					if event.key == pygame.K_2:
+						key = 2
+					if event.key == pygame.K_3:
+						key = 3
+					if event.key == pygame.K_4:
+						key = 4
+					if event.key == pygame.K_5:
+						key = 5
+					if event.key == pygame.K_6:
+						key = 6
+					if event.key == pygame.K_7:
+						key = 7
+					if event.key == pygame.K_8:
+						key = 8
+					if event.key == pygame.K_9:
+						key = 9
+					if event.key == pygame.K_DELETE or event.key ==  pygame.K_BACKSPACE:
+							#board.clear()
+						key = None
+					if event.key == pygame.K_RETURN:
+						selectCellValue = True
+			print(key,selectCellValue)
+
 		
 
-		#print(mousex, mousey,key)
+			
+		
 
 		
 		if mouseClicked == True:
 			clickCount += 1
 			if validSelection(mousex,mousey) and clickCount%2 == 1:
-				#print(mousex, mousey)			
 				selectBox(mousex, mousey)
-				if key != 0 or key is not None:
-					scribe_into(mousex,mousey,key)
 			else:
 				deselectBox(mousex,mousey)
 
 
+		if validSelection(mousex,mousey) and key is not None and clickCount %2 == 1:
+			print('im here')
+			scribe_into(mousex,mousey,key)
+
+
+
 		mouseClicked = False
+		selectCellValue = False
+		key = None
+		#selectCellValue = False
+
+	
 
 		pygame.display.update()
 		FPSClock.tick(FPS)
-
-
 
 
 
