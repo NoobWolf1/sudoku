@@ -1,6 +1,7 @@
 import pygame, sys
 from pygame.locals import *
 from backtrackingAlgo import solve, valid
+import math
 
 board = [
 	[7,8,0,4,0,0,1,2,0],
@@ -52,6 +53,7 @@ LightGrey = (200,200,200)
 Blue = (0,0,255)
 Green = (0,255,0)
 Red = (255,0,0)
+
 def populateCells(board):
 	i,j = 0,0
 	for y in range (0,WindowHeight,CellSize):
@@ -105,7 +107,7 @@ def drawGrid():
 
 
 def validSelection(mousex,mousey):
-	if mousey <= WindowHeight:
+	if mousey < WindowHeight:
 		xnumber = (mousex - (mousex % CellSize)) // CellSize
 		ynumber = (mousey - (mousey % CellSize)) // CellSize
 		if b[ynumber][xnumber] == 0 :
@@ -141,17 +143,38 @@ def scribe_into(mousex,mousey,key,selectCellValue):
 		deleteCellValue(xnumber,ynumber)
 
 	else:
+	#	DisplaySurf.fill(White)
+		drawGrid()
+		populateCells(board)
+		pygame.display.update()
+		selectBox(mousex,mousey)
+
 		cellSurf = BasicFont.render('%s' %(key) , True , LightGrey )
 		cellRect = cellSurf.get_rect()
 		cellRect.topleft = (x+CellSize/3,y+CellSize/3)
 		DisplaySurf.blit(cellSurf, cellRect)
 
 	if selectCellValue and valid(board,key,(ynumber,xnumber)):
-		print('naach')	
 		updateBoard(key,mousex,mousey)
+		hint = '~/'
+		cellSurf = BasicFont.render('%s' %(hint) , True , Green )
+		cellRect = cellSurf.get_rect()
+		cellRect.topleft = (CellSize/3,450+CellSize/3)
+		DisplaySurf.blit(cellSurf, cellRect)
+
+
+	elif selectCellValue and not valid(board,key,(ynumber,xnumber)):
+		hint = 'X'
+		cellSurf = BasicFont.render('%s' %(hint) , True , Red )
+		cellRect = cellSurf.get_rect()
+		cellRect.topleft = (CellSize/3,450+CellSize/3)
+		DisplaySurf.blit(cellSurf, cellRect)
+
+
 
 def deleteCellValue(xnumber,ynumber):
 	board[ynumber][xnumber] = 0
+
 	DisplaySurf.fill(White)
 	drawGrid()
 	populateCells(board)
@@ -163,9 +186,11 @@ def updateBoard(key,mousex,mousey):
 	xnumber = x // CellSize
 	ynumber = y // CellSize
 
-	DisplaySurf.fill(White)
+	#DisplaySurf.fill(White)
 	drawGrid()
 	populateCells(board)
+	selectBox(mousex, mousey)
+
 	pygame.display.update()
 
 	board[ynumber][xnumber] = key
@@ -180,13 +205,11 @@ def updateBoard(key,mousex,mousey):
 					DisplaySurf.blit(cellSurf, cellRect)
 
 def addClock(sec):
-
-	#pygame.time.delay(300)
-
 	mins = sec // 60
 	sec = sec % 60
 	hours = mins // 60
 	mins = mins % 60
+
 	timer = str()
 
 	if mins < 10 and sec < 10 :
@@ -196,30 +219,30 @@ def addClock(sec):
 	else:
 		timer = str(mins)+':'+str(sec)
 
-	print(timer)
-
-
+	#print(timer)
 	cellSurf = BasicFont.render('%s' %(timer) , True , Red )
 	cellRect = cellSurf.get_rect()
 	cellRect.topleft = (350+CellSize/3,450+CellSize/3)
 	DisplaySurf.blit(cellSurf, cellRect)
 
-	#pygame.time.delay(300)
-
-	#DisplaySurf.fill(White)
-	#drawGrid()
-	#populateCells(board)
-
-	
 	
 
+def clearClock():
+	pygame.draw.rect(DisplaySurf, White, (350+CellSize/3,450+CellSize/3,CellSize*2,CellSize) )
 
+def checkWin():
+	check = 0 
+	for i in range(0,len(board)):
+		for j in range(0,len(board[0])):
+			if board[i][j] == 0:
+				check += 1
 
+	return check
 
 
 
 def main():
-	global FPSClock, DisplaySurf, BasicFont, BasicFontSize, mouseClicked,clickCount
+	global FPSClock, DisplaySurf, BasicFont, BasicFontSize, mouseClicked,clickCount,run
 	clickCount = 0
 
 	#selectCellValue = False
@@ -249,11 +272,9 @@ def main():
 	run = True
 	while run:
 
-		seconds = (pygame.time.get_ticks() - start_ticks) // 1000
-		
-		addClock(seconds)
+		seconds = (pygame.time.get_ticks() - start_ticks) / 1000
+		sec = (pygame.time.get_ticks() - start_ticks) // 1000
 
-		
 		for event in pygame.event.get():
 			if event.type == QUIT :
 				run = False 
@@ -291,8 +312,12 @@ def main():
 						key = 0
 					if event.key == pygame.K_RETURN:
 						selectCellValue = True
+					
+
+
+
 		
-			print(key,selectCellValue)
+			#print(key,selectCellValue)
 		
 		if mouseClicked == True:
 			clickCount += 1
@@ -303,8 +328,10 @@ def main():
 
 
 		if validSelection(mousex,mousey) and key is not None and clickCount %2 == 1:
-			print('im here')
+			#print('im here')
 			scribe_into(mousexClick,mouseyClick,key,selectCellValue)
+
+
 
 
 		#deleting clause
@@ -317,12 +344,88 @@ def main():
 			selectCellValue = False
 			key = None
 
-		mouseClicked = False
-		#selectCellValue = False
-		#key = None
+		#blinking botton clock
+		if (seconds - int(seconds)) <= 0.750 :
+			addClock(sec)
+		else:
+			clearClock()
 
+
+		check = checkWin()
+		if check == 0:
+			a = sec
+			winningScreen(a)
+			run = False
+
+
+		
+		mouseClicked = False
+	
 		pygame.display.update()
 		FPSClock.tick(FPS)
+
+
+def winningScreen(sec):
+
+	DisplaySurf = pygame.display.set_mode((WindowWidth,WindowHeight+CellSize))
+	pygame.display.set_caption('Sudoku')
+	BasicFontSize = 20
+	BasicFont = pygame.font.SysFont('Arial', BasicFontSize)
+	DisplaySurf.fill(White)
+
+	mins = sec // 60
+	sec = sec % 60
+	hours = mins // 60
+	mins = mins % 60
+
+	timer = str()
+
+	if mins < 10 and sec < 10 :
+		timer = '0'+str(mins)+':'+'0'+str(sec)
+	elif mins < 10 and sec >= 10 :
+		timer = '0'+str(mins)+':'+str(sec)
+	else:
+		timer = str(mins)+':'+str(sec)
+
+	winText1 = 'Congratulations you have'
+	winText2 = ' completed this puzzle in ' 
+
+	
+
+	play = True
+	while play:
+		for event in pygame.event.get():
+			if event.type == QUIT :
+				run = False 
+				pygame.quit()
+				sys.exit()
+
+		cellSurf = BasicFont.render('%s' %(winText1) , True , Black )
+		cellRect = cellSurf.get_rect()
+		cellRect.topleft = (CellSize+ CellSize/3,CellSize*3+ CellSize/3)
+		DisplaySurf.blit(cellSurf, cellRect)
+
+		cellSurf = BasicFont.render('%s' %(winText2) , True , Black )
+		cellRect = cellSurf.get_rect()
+		cellRect.topleft = (CellSize + CellSize/3,CellSize*4 + CellSize/3)
+		DisplaySurf.blit(cellSurf, cellRect)
+
+		cellSurf = BasicFont.render('%s' %(timer) , True , Red )
+		cellRect = cellSurf.get_rect()
+		cellRect.topleft = (CellSize + CellSize/3,5*CellSize+CellSize/3)
+		DisplaySurf.blit(cellSurf, cellRect)
+
+
+		pygame.display.update()
+
+
+
+
+
+
+
+
+
 
 
 
